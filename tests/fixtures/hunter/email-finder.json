@@ -1,0 +1,41 @@
+{
+  "data": {
+    "first_name": "Richard",
+    "last_name": "Hendricks",
+    "email": "richard@piedpiper.com",
+    "score": 99,
+    "domain": "piedpiper.com",
+    "accept_all": false,
+    "position": "CEO",
+    "twitter": "rhendricks",
+    "linkedin_url": "https://www.linkedin.com/in/richard-hendricks-a70944101/",
+    "phone_number": "+1 650 555 5555",
+    "company": "Pied Piper",
+    "source_type": "found",
+    "provenance": "found",
+    "sources": [
+      {
+        "domain": "piedpiper.com",
+        "uri": "https://www.piedpiper.com/about",
+        "extracted_on": "2022-01-01",
+        "last_seen_on": "2023-01-01",
+        "still_on_page": true
+      }
+    ],
+    "verification": {
+      "date": "2023-01-01",
+      "status": "valid"
+    }
+  },
+  "meta": {
+    "params": {
+      "first_name": "Patrick",
+      "last_name": "Collison",
+      "full_name": null,
+      "domain": "stripe.com",
+      "company": null,
+      "linkedin_handle": null,
+      "max_duration": null
+    }
+  }
+}

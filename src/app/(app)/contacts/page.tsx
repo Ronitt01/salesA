@@ -94,6 +94,7 @@ async function Contacts({ searchParams }: { searchParams: SearchParams }) {
               { header: "Email", cell: (r) => r.email ?? "–", className: "text-muted-foreground" },
               { header: "Verification", cell: (r) => <VerificationBadge status={r.verification_status} /> },
               { header: "Last verified", cell: (r) => (r.last_verified_at ? formatDate(r.last_verified_at, tz) : "Never"), className: "text-muted-foreground whitespace-nowrap" },
+              { header: "Confidence", align: "right", cell: (r) => (r.email_confidence === null ? "–" : r.email_confidence) },
               { header: "Reliability", align: "right", cell: (r) => (r.reliability_score === null ? "–" : r.reliability_score) },
               {
                 header: "Provenance",

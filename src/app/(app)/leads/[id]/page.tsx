@@ -19,6 +19,7 @@ import {
   Target,
   Users,
 } from "lucide-react";
+import { EnrichContactsButton, VerifyEmailButton } from "@/components/leads/enrichment-controls";
 import { EditLeadDialog, NoteForm, RescoreButton } from "@/components/leads/lead-detail-actions";
 import {
   IntentBadge,
@@ -37,12 +38,15 @@ import { formatDate, formatDateTime, formatInr, formatRelative } from "@/lib/for
 import {
   ACQUISITION_CHANNEL_LABEL,
   CONTACT_ROLE_LABEL,
+  PROVENANCE_SOURCE_LABEL,
   PRIORITY_LABEL,
   SIGNAL_TYPE_LABEL,
   SOURCE_KIND_LABEL,
 } from "@/lib/labels";
 import { canWrite, getSessionContext } from "@/server/auth/context";
+import { getEnrichmentAvailability } from "@/server/repositories/enrichment";
 import { getLeadDetail, getLeadFilterOptions } from "@/server/repositories/leads";
+import { parseProvenance } from "@/server/services/enrichment/merge";
 
 export const metadata: Metadata = { title: "Lead details" };
 
@@ -98,6 +102,20 @@ function EvidenceLink({ url, isDemo }: { url: string; isDemo: boolean }) {
   );
 }
 
+/** The exact status Hunter returned, stored with each verification. */
+function hunterStatus(detail: unknown): string | null {
+  if (detail && typeof detail === "object" && "hunter_status" in detail && typeof detail.hunter_status === "string") return detail.hunter_status;
+  return null;
+}
+
+function emailSourceLabel(provenance: unknown, email: string | null): string {
+  if (!email) return "–";
+  const entry = parseProvenance(provenance).email;
+  if (!entry) return "Not recorded (treated as entered by a person)";
+  const label = PROVENANCE_SOURCE_LABEL[entry.source] ?? entry.source;
+  return entry.hunterSources ? `${label}, found on ${entry.hunterSources} public page${entry.hunterSources === 1 ? "" : "s"}` : label;
+}
+
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="min-w-0">
@@ -119,6 +137,7 @@ async function LeadDetail({ params }: { params: Params }) {
   const tz = ctx.workspace.timezone;
   const { company, contacts, research, signals, opportunities, snapshots, messages, meetings, activities } = detail;
   const writer = canWrite(ctx.role);
+  const enrichment = await getEnrichmentAvailability(ctx, company, now);
 
   const summary = research.find((r) => r.kind === "summary");
   const facts = research.filter((r) => r.kind === "observed_fact");
@@ -576,7 +595,11 @@ async function LeadDetail({ params }: { params: Params }) {
             )}
           </Panel>
 
-          <Panel title="Decision-maker and contacts" description={`${contacts.length} contact${contacts.length === 1 ? "" : "s"} on record`}>
+          <Panel
+            title="Decision-maker and contacts"
+            description={`${contacts.length} contact${contacts.length === 1 ? "" : "s"} on record${enrichment.lastEnrichedAt ? ` · enriched ${formatRelative(enrichment.lastEnrichedAt, now)}` : ""}`}
+            actions={writer ? <EnrichContactsButton companyId={company.id} disabledReason={enrichment.companyReason} /> : undefined}
+          >
             {contacts.length === 0 ? (
               <EmptyState icon={Users} title="No contact identified" description="A lead cannot qualify without a reliable, verified contact." className="py-6" />
             ) : (
@@ -612,6 +635,21 @@ async function LeadDetail({ params }: { params: Params }) {
                         </div>
                       ) : null}
                       <div className="flex gap-2">
+                        <dt className="w-24 shrink-0 text-muted-foreground">Confidence</dt>
+                        <dd>{c.email_confidence === null ? "Not provided" : `${c.email_confidence} / 100 (provider)`}</dd>
+                      </div>
+                      <div className="flex gap-2">
+                        <dt className="w-24 shrink-0 text-muted-foreground">Email source</dt>
+                        <dd>{emailSourceLabel(c.field_provenance, c.email)}</dd>
+                      </div>
+                      <div className="flex gap-2">
+                        <dt className="w-24 shrink-0 text-muted-foreground">Last verified</dt>
+                        <dd>
+                          {c.last_verified_at ? `${formatDateTime(c.last_verified_at, tz)} (${formatRelative(c.last_verified_at, now)})` : "Never"}
+                          {c.verification_provider ? <span className="text-muted-foreground"> · {c.verification_provider}</span> : null}
+                        </dd>
+                      </div>
+                      <div className="flex gap-2">
                         <dt className="w-24 shrink-0 text-muted-foreground">Reliability</dt>
                         <dd>{c.reliability_score === null ? "Not scored" : `${c.reliability_score} / 100`}</dd>
                       </div>
@@ -624,10 +662,13 @@ async function LeadDetail({ params }: { params: Params }) {
                       </div>
                     </dl>
                     <div className="mt-2 border-t pt-2">
-                      <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                        <ShieldCheck className="size-3.5" />
-                        Verification history
-                      </p>
+                      <div className="flex items-center justify-between gap-2">
+                        <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                          <ShieldCheck className="size-3.5" />
+                          Verification history
+                        </p>
+                        {writer ? <VerifyEmailButton contactId={c.id} disabledReason={enrichment.verifyReason(c)} /> : null}
+                      </div>
                       {c.contact_verifications.length === 0 ? (
                         <p className="mt-1 text-xs text-subtle">Never verified.</p>
                       ) : (
@@ -637,7 +678,10 @@ async function LeadDetail({ params }: { params: Params }) {
                               <span>
                                 {formatDate(v.checked_at, tz)} · {v.provider}
                               </span>
-                              <span>{v.result.replace("_", " ")}</span>
+                              <span>
+                                {v.result.replace("_", " ")}
+                                {hunterStatus(v.detail) ? <span className="text-subtle"> (Hunter: {hunterStatus(v.detail)})</span> : null}
+                              </span>
                             </li>
                           ))}
                         </ul>

@@ -24,8 +24,8 @@ PostgreSQL 17 on Supabase. Source of truth: `supabase/migrations/`. Generated ty
 | `industry_experiments` | Assumptions and spend per industry | Assumption scores 0–10 |
 | `service_catalogue` | What the agency sells | `unique (tenant_id, slug)`; `needs_review` flag |
 | `companies` | Company record, funnel milestones, latest score | **Unique `(tenant_id, normalised_domain)`** |
-| `contacts` | People at companies | **Unique `(tenant_id, email_normalised)`**; one primary per company |
-| `contact_verifications` | Verification history | |
+| `contacts` | People at companies | **Unique `(tenant_id, email_normalised)`**; one primary per company. `email_confidence` (0–100, from Hunter) and `field_provenance` (jsonb object: source of each enriched field, see [contact-enrichment.md](contact-enrichment.md#provenance)) |
+| `contact_verifications` | Verification history | `detail` keeps the provider's exact result (for Hunter: `hunter_status`, `score`, `checks`) |
 | `research_records` | One statement per row: summary, observed fact, AI hypothesis | **Observed fact requires `evidence_url`** |
 | `buying_signals` | Signal with evidence, confidence and expiry | `expires_at > observed_at` |
 | `opportunities` | One service need at one company | Many per company |

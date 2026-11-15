@@ -188,7 +188,7 @@ export async function getLeadDetail(ctx: SessionContext, companyId: string) {
     scoped(
       supabase
         .from("contacts")
-        .select("*, sources(kind, label), contact_verifications(id, provider, result, checked_at)"),
+        .select("*, sources(kind, label), contact_verifications(id, provider, result, checked_at, detail)"),
     )
       .order("is_primary", { ascending: false })
       .order("created_at", { ascending: true }),

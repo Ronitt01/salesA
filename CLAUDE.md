@@ -23,6 +23,7 @@ Read `PROGRESS.md` first: it says what is built, what is not, and what to do nex
 | Production build + secret scan | `npm run build && npm run check:bundle` |
 | One live AI call (billed when `LLM_PROVIDER=anthropic`) | `npm run ai:smoke` |
 | Record a new prompt version | `npm run ai:lock` |
+| Hunter.io endpoint check (free test key / live key, a few credits) | `npm run hunter:smoke` / `npm run hunter:smoke:live` |
 
 Local Supabase runs on ports **55321–55329**, not the defaults, so it can run beside other Supabase projects on this machine. Apply a new migration with `npx supabase migration up`, then `npm run db:types`.
 

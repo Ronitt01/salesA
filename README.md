@@ -57,6 +57,8 @@ npm run dev
 | `npm run ai:smoke` | Run one prompt through the configured AI provider (one billed call when it is Anthropic or Gemini) |
 | `npm run ai:smoke:gemini` | The same, forcing Gemini for that run (needs `GEMINI_API_KEY`) |
 | `npm run ai:lock` | Record a new prompt version in the prompt lock |
+| `npm run hunter:smoke` | Check the Hunter.io endpoints with Hunter's free test key (fictional data) |
+| `npm run hunter:smoke:live` | The same with `HUNTER_API_KEY` (spends a few credits; prints masked addresses only) |
 
 ## Demo data
 
@@ -79,6 +81,7 @@ Reset or remove it from **Settings → Demo data**, or with `npm run db:seed`.
 | [docs/architecture.md](docs/architecture.md) | Structure, request flow, key decisions |
 | [docs/database-schema.md](docs/database-schema.md) | Tables, constraints, RLS, metric functions |
 | [docs/ai-framework.md](docs/ai-framework.md) | AI runner, providers, prompts, guards, execution log |
+| [docs/contact-enrichment.md](docs/contact-enrichment.md) | Hunter.io contact discovery and email verification |
 | [docs/agent-design.md](docs/agent-design.md) | Scoring, insights, planned AI agents |
 | [docs/outreach-policies.md](docs/outreach-policies.md) | Channel rules and compliance guards |
 | [docs/n8n-workflows.md](docs/n8n-workflows.md) | The six workflows and the n8n integration plan |

@@ -28,6 +28,8 @@ const SECRET_PATTERNS: RegExp[] = [
   /sk-ant-[A-Za-z0-9_-]{8,}/g,
   // Google API keys.
   /\bAIza[0-9A-Za-z_-]{30,}/g,
+  // Credentials passed as a query parameter, e.g. Hunter.io's api_key.
+  /(?<=[?&](?:api_key|apikey|key|token)=)[^&\s"'#]+/gi,
   /\bsk-[A-Za-z0-9_-]{20,}/g,
   /\beyJ[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{8,}/g,
 ];
@@ -35,6 +37,7 @@ const SECRET_ENV_VARS = [
   "ANTHROPIC_API_KEY",
   "GEMINI_API_KEY",
   "GOOGLE_API_KEY",
+  "HUNTER_API_KEY",
   "OPENAI_API_KEY",
   "SUPABASE_SERVICE_ROLE_KEY",
   "N8N_WEBHOOK_SECRET",

@@ -1,6 +1,6 @@
 # HUNTER progress tracker
 
-Last updated: 16 November 2026 (Gemini provider added to the AI framework).
+Last updated: 16 November 2026 (Hunter.io contact discovery and email verification).
 
 Status key: **Done** = built and verified by a test or a browser check. **Partial** = some of it works; the gap is stated. **Not started** = no code yet.
 
@@ -16,9 +16,9 @@ Verified on 16 November 2026:
 |---|---|
 | `npm run typecheck` | Pass |
 | `npm run lint` | Pass |
-| `npm test` (unit) | 230 passed |
-| `npm run test:integration` | 36 passed |
-| `npm run test:e2e` | 23 passed |
+| `npm test` (unit) | 293 passed |
+| `npm run test:integration` | 51 passed |
+| `npm run test:e2e` | 24 passed |
 | `npm run build` | Pass |
 | `npm run check:bundle` | Pass, no server secrets in client files |
 
@@ -63,7 +63,8 @@ Verified on 16 November 2026:
 | Industry attractiveness score (assumptions blended with actuals) | Done, tested |
 | Rule-based daily insights and industry recommendations | Done, tested |
 | AI framework: provider interface, Anthropic adapter, deterministic mock, runner, guards, prompts, execution log | Done, tested (Sprint 2). Live Anthropic call not yet verified |
-| Search, discovery, website research, enrichment, verification provider interfaces and mocks | Not started |
+| Contact enrichment and email verification (Hunter.io) | Done, tested against a fake. Live calls blocked by the Hunter account restriction (see below) |
+| Search, discovery and website research providers | Not started |
 | Company discovery workflow (WF-01) | Not started |
 | Research and signal detection (WF-02) | Not started |
 | Service matching by AI | Not started (demo opportunities are seeded; people can create them) |
@@ -106,6 +107,22 @@ Added after Sprint 2. Details in [docs/ai-framework.md](docs/ai-framework.md#pro
 
 Unchanged: the Anthropic adapter, the mock, prompts, schemas, guards and all business logic. One extra fix: `src/server/env.ts` now accepts `LLM_PROVIDER=gemini`. Without it, choosing Gemini would have broken every page, not just AI calls.
 
+## Hunter.io contact discovery: Done (live path blocked)
+
+Details in [docs/contact-enrichment.md](docs/contact-enrichment.md).
+
+| Item | Status |
+|---|---|
+| Hunter client: Domain Search, Email Finder, Email Verifier, Account; Zod-validated; timeouts, bounded retries, rate limits, 15 error kinds, credit tracking, redacted logs | Done, 25 unit tests against a fake fetch |
+| Deterministic, configurable decision-maker ranking | Done, tested (38 unit tests cover ranking, policy, merge and status mapping) |
+| Enrichment policy: no demo data, researched companies only, minimum score, cooldowns, per-run limits | Done, tested |
+| Merge rules: no duplicates, manual data and manual verification preserved, confidence-based replacement, field provenance | Done, tested (unit and 15 integration tests) |
+| Exact Hunter result kept in `contact_verifications.detail`; only `valid` counts as deliverable | Done, tested |
+| Lead page: Enrich contacts, Verify email, confidence, source, last verification; Contacts screen confidence column | Done, 1 browser test |
+| `npm run hunter:smoke` (test key) / `npm run hunter:smoke:live` | Test key: 3/3 endpoints pass. **Live: the key authenticates but Hunter returns 429 `restricted_account` for every search and verification.** No credits spent |
+
+Schema: migration `20261117000100_contact_enrichment` adds `contacts.email_confidence` and `contacts.field_provenance`. No new tables. The scoring formula is unchanged; enrichment calls `rescoreCompany`. Nothing is sent and nobody is contacted.
+
 ## Phase 4 — Sales execution: Started
 
 Database guards exist and are tested (suppression blocks enrolment, a new suppression stops sequences and cancels unsent messages, booked meetings require a prospect-chosen slot).
@@ -146,7 +163,7 @@ Database guards exist and are tested (suppression blocks enrolment, a new suppre
 
 ## Next session: start here
 
-1. Verify the live providers: with `ANTHROPIC_API_KEY` set, run `npm run ai:smoke -- --provider=anthropic`; with `GEMINI_API_KEY` set, run `npm run ai:smoke:gemini`. Note the results here.
+1. Verify the live providers: with `ANTHROPIC_API_KEY` set, run `npm run ai:smoke -- --provider=anthropic`; with `GEMINI_API_KEY` set, run `npm run ai:smoke:gemini`. Once the Hunter account restriction is lifted, run `npm run hunter:smoke:live`. Note the results here.
 2. Wire the first agents onto the framework: reply classification (WF-05) with the deterministic opt-out override, then outreach draft generation feeding the approval queue.
 3. The follow-up sequencer with stop conditions, calling the same compliance gate with `actor.kind = "automation"`.
 4. Suppression and consent actions in the Contacts screen, and the unsubscribe endpoint.

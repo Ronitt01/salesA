@@ -8,6 +8,7 @@ import { PageSkeleton } from "@/components/shell/shell-skeleton";
 import { formatInrCompact } from "@/lib/format";
 import { CHANNEL_LABEL, ROLE_LABEL } from "@/lib/labels";
 import { getSessionContext, isAdmin } from "@/server/auth/context";
+import { hunterKeyStatus } from "@/server/providers/hunter/client";
 
 export const metadata: Metadata = { title: "Settings" };
 
@@ -181,7 +182,12 @@ async function Settings() {
           <ul className="divide-y divide-border/60">
             {(providers.data ?? []).map((row) => {
               // The AI provider is selected by the server environment, so show what is really in use.
-              const p = row.category === "llm" ? { ...row, provider: llmProvider } : row;
+              const p =
+                row.category === "llm"
+                  ? { ...row, provider: llmProvider }
+                  : (row.category === "enrichment" || row.category === "email_verification") && hunterKeyStatus() === "live"
+                    ? { ...row, provider: "hunter.io" }
+                    : row;
               const mock = p.provider === "mock" || p.provider === "local_simulation";
               return (
                 <li key={p.category} className="flex items-center justify-between gap-3 py-2 first:pt-0 last:pb-0">

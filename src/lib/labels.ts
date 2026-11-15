@@ -169,6 +169,14 @@ export const CONTACT_ROLE_LABEL: Record<Enums["contact_role"], string> = {
   other: "Other",
 };
 
+/** Where an enriched contact field came from (contacts.field_provenance). */
+export const PROVENANCE_SOURCE_LABEL: Record<string, string> = {
+  manual: "Entered by a person",
+  "hunter.io:domain_search": "Hunter.io domain search",
+  "hunter.io:email_finder": "Hunter.io email finder",
+  "hunter.io:email_verifier": "Hunter.io email verifier",
+};
+
 export const EMPLOYEE_RANGES: Enums["employee_range"][] = ["1-9", "10-49", "50-99", "100-200", "201-500", "500+"];
 
 export const PRIORITY_LABEL: Record<Enums["lead_priority"], string> = {

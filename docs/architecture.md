@@ -16,6 +16,7 @@ Next.js 16 (App Router)
   ├─ server/repositories/*     every database read
   ├─ server/services/*         pure business logic (scoring, compliance gate, insights)
   ├─ server/ai/*               AI runner, providers, prompts, guards (server-only)
+  ├─ server/providers/hunter/* Hunter.io client for contact discovery and verification (server-only)
   └─ server/db/*               Supabase clients and generated types
         │
         ▼
@@ -25,7 +26,8 @@ Supabase: Postgres + Auth
   └─ Triggers that enforce suppression and do-not-contact
 
 Model providers: Anthropic Claude or Google Gemini (official SDKs), or the deterministic mock, selected by environment.
-Planned, not built: n8n (scheduling), data providers (search, enrichment, email, calendar).
+Contact data: Hunter.io (Domain Search, Email Finder, Email Verifier), on request from the lead page only.
+Planned, not built: n8n (scheduling), data providers (search, website fetch, email delivery, calendar).
 ```
 
 HUNTER is one deployable application. There are no microservices. n8n, when connected, only schedules and orchestrates; the logic and the safety gates stay in HUNTER.

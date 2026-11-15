@@ -4,13 +4,13 @@
 
 | Suite | Command | Needs | What it covers |
 |---|---|---|---|
-| Unit | `npm test` | Nothing | Scoring engine, contact reliability, compliance gate, industry score, insights, date ranges and timezones, formatting, URL parameters, demo dataset generator, AI framework (provider selection, mock, Anthropic and Gemini adapters against fake transports, retries, rate limits, invalid JSON, schema and guard failures, prompt injection, secret redaction, prompt version lock) |
-| Integration | `npm run test:integration` | Local Supabase running | RLS tenant isolation, roles, deduplication, suppression and do-not-contact guards, meeting and evidence constraints, rescoring, demo seed and reset, AI execution log (tenant isolation, append-only, constraints) |
-| Browser | `npm run test:e2e` | Local Supabase + `npm run db:seed` | Sign-in, every navigation item, dashboard, filters, lead create/edit, saved filters, bulk tags, export, approval queue and compliance gate, phone layout |
+| Unit | `npm test` | Nothing | Scoring engine, contact reliability, compliance gate, industry score, insights, date ranges and timezones, formatting, URL parameters, demo dataset generator, AI framework (provider selection, mock, Anthropic and Gemini adapters against fake transports, retries, rate limits, invalid JSON, schema and guard failures, prompt injection, secret redaction, prompt version lock), Hunter client against a fake fetch (parameters, parsing, credits, retries, rate limits, every error status, verifier polling, timeouts, log redaction), enrichment ranking, policy, merge rules and status mapping |
+| Integration | `npm run test:integration` | Local Supabase running | RLS tenant isolation, roles, deduplication, suppression and do-not-contact guards, meeting and evidence constraints, rescoring, demo seed and reset, AI execution log (tenant isolation, append-only, constraints), contact enrichment with a scripted Hunter fake (provenance, no duplicates, manual data preserved, failures leave contacts unchanged, guards before paid calls, tenant isolation) |
+| Browser | `npm run test:e2e` | Local Supabase + `npm run db:seed` | Sign-in, every navigation item, dashboard, filters, lead create/edit, saved filters, bulk tags, export, approval queue and compliance gate, enrichment controls on demo data, phone layout |
 | Static | `npm run typecheck`, `npm run lint` | Nothing | Types and lint rules |
 | Build | `npm run build && npm run check:bundle` | `.env.local` | Production build; no server secret in browser files |
 
-None of the suites needs AI credentials: the AI tests use the mock provider, scripted providers and fake HTTP transports for the Anthropic and Gemini adapters. A live call is checked separately with `npm run ai:smoke`.
+None of the suites needs AI credentials: the AI tests use the mock provider, scripted providers and fake HTTP transports for the Anthropic and Gemini adapters. A live call is checked separately with `npm run ai:smoke`. Likewise no suite calls Hunter.io: `npm run hunter:smoke` checks the endpoints with Hunter's free test key, and `npm run hunter:smoke:live` with the real key.
 
 Integration tests refuse to run unless `NEXT_PUBLIC_SUPABASE_URL` points at localhost. They create their own workspaces and users and delete them afterwards. Browser tests remove the companies and saved filters they create (names start with "E2E Test").
 
@@ -20,9 +20,9 @@ Integration tests refuse to run unless `NEXT_PUBLIC_SUPABASE_URL` points at loca
 |---|---|
 | Type check | Pass |
 | Lint | Pass |
-| Unit | 230 passed, 0 failed |
-| Integration | 36 passed, 0 failed |
-| Browser | 23 passed, 0 failed |
+| Unit | 293 passed, 0 failed |
+| Integration | 51 passed, 0 failed |
+| Browser | 24 passed, 0 failed |
 | Build | Pass |
 | Bundle secret scan | Pass |
 

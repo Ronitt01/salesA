@@ -95,7 +95,8 @@ test.describe("navigation", () => {
     await page.goto("/overview");
     await expect(page.getByText("Demo · synthetic data")).toBeVisible();
     await page.getByRole("button", { name: /System status/ }).click();
-    await expect(page.getByText("Mock (deterministic)")).toBeVisible();
+    // The label follows LLM_PROVIDER in .env.local.
+    await expect(page.getByText(/^(Mock \(deterministic\)|Anthropic Claude|Google Gemini)$/)).toBeVisible();
     await expect(page.getByText("Off (nothing is sent)")).toBeVisible();
     await page.keyboard.press("Escape");
     await page.getByRole("button", { name: /Notifications/ }).click();
@@ -271,6 +272,19 @@ test.describe("lead explorer", () => {
     for (const section of ["Buying signals", "Opportunities", "Outreach history", "Reply history", "Meeting history", "Notes and activity", "Decision-maker and contacts"]) {
       await expect(page.getByRole("heading", { level: 2, name: section })).toBeVisible();
     }
+  });
+
+  test("contact enrichment controls are disabled for demo data and say why", async ({ page }) => {
+    await page.goto("/leads?q=Greenacre");
+    await page.getByRole("link", { name: "Greenacre Realty" }).click();
+    // Demo companies are never sent to Hunter, whatever the key configuration.
+    const reason = /not configured|test key|demo|Demo/;
+    const enrich = page.getByLabel(/^Enrich contacts: /);
+    await expect(enrich).toHaveAttribute("aria-label", reason);
+    await expect(enrich.getByRole("button", { name: "Enrich contacts" })).toBeDisabled();
+    const verify = page.getByLabel(/^Verify email: /).first();
+    await expect(verify).toHaveAttribute("aria-label", reason);
+    await expect(page.getByText("Email source").first()).toBeVisible();
   });
 
   test("bulk tagging and saved filters work", async ({ page }) => {

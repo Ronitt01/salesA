@@ -148,6 +148,12 @@ export async function createLead(input: LeadInput): Promise<ActionResult<{ id: s
         is_primary: true,
         source_id: source.data.id,
         provenance_note: `Entered manually by ${ctx.user.fullName ?? ctx.user.email}.`,
+        // Fields a person entered are recorded as manual, so enrichment never overwrites them.
+        field_provenance: Object.fromEntries(
+          (["full_name", "job_title", "email"] as const)
+            .filter((field) => (field === "full_name" ? v.contactName : field === "job_title" ? v.contactTitle : v.contactEmail))
+            .map((field) => [field, { source: "manual", sourceId: source.data.id, retrievedAt: new Date().toISOString() }]),
+        ),
       });
       if (contact.error) {
         if (contact.error.code === "23505") return { ok: false, error: "A contact with this email already exists." };

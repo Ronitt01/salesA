@@ -40,7 +40,7 @@ export async function listContacts(ctx: SessionContext, q: string | undefined) {
   let query = ctx.supabase
     .from("contacts")
     .select(
-      "id, full_name, job_title, role_category, email, phone, is_primary, verification_status, last_verified_at, reliability_score, do_not_contact, is_demo, company_id, companies(name), sources(kind, label)",
+      "id, full_name, job_title, role_category, email, phone, is_primary, verification_status, last_verified_at, reliability_score, email_confidence, do_not_contact, is_demo, company_id, companies(name), sources(kind, label)",
     )
     .eq("tenant_id", ctx.tenantId)
     .order("full_name", { ascending: true })

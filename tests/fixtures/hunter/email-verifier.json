@@ -1,0 +1,28 @@
+{
+  "data": {
+    "status": "valid",
+    "score": 99,
+    "email": "richard@piedpiper.com",
+    "regexp": true,
+    "gibberish": false,
+    "disposable": false,
+    "webmail": false,
+    "mx_records": true,
+    "smtp_server": true,
+    "smtp_check": true,
+    "accept_all": false,
+    "block": false,
+    "verification": {
+      "date": "2023-01-01",
+      "status": "valid"
+    },
+    "sources": [],
+    "result": "deliverable",
+    "_deprecation_notice": "Using result is deprecated, use status instead"
+  },
+  "meta": {
+    "params": {
+      "email": "patrick@stripe.com"
+    }
+  }
+}

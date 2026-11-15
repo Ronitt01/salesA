@@ -15,6 +15,8 @@
     "ai:lock": "tsx scripts/update-prompt-lock.ts",
     "ai:smoke": "tsx --conditions=react-server scripts/ai-smoke.ts",
     "ai:smoke:gemini": "tsx --conditions=react-server scripts/ai-smoke.ts --provider=gemini",
+    "hunter:smoke": "tsx --conditions=react-server scripts/hunter-smoke.ts",
+    "hunter:smoke:live": "tsx --conditions=react-server scripts/hunter-smoke.ts --live",
     "db:start": "supabase start -x realtime,storage-api,imgproxy,edge-runtime,logflare,vector,supavisor",
     "db:stop": "supabase stop",
     "db:status": "supabase status",
