@@ -48,7 +48,8 @@ describe("provider selection", () => {
 
   it("reports OpenAI as not implemented, and unknown providers as errors", () => {
     expect(configError({ LLM_PROVIDER: "openai", OPENAI_API_KEY: "x" }).message).toContain("not implemented");
-    expect(configError({ LLM_PROVIDER: "gemini" }).message).toContain("Unknown LLM_PROVIDER");
+    expect(configError({ LLM_PROVIDER: "openai" }).message).toContain("anthropic, gemini or mock");
+    expect(configError({ LLM_PROVIDER: "mistral" }).message).toContain("Unknown LLM_PROVIDER");
   });
 
   it("validates numeric limits", () => {
@@ -59,6 +60,7 @@ describe("provider selection", () => {
 
   it("knows which provider was requested even when configuration fails", () => {
     expect(requestedProviderName({ LLM_PROVIDER: "anthropic" })).toBe("anthropic");
+    expect(requestedProviderName({ LLM_PROVIDER: "Gemini" })).toBe("gemini");
     expect(requestedProviderName({})).toBe("mock");
     expect(requestedProviderName({ LLM_PROVIDER: "something" })).toBe("unconfigured");
   });

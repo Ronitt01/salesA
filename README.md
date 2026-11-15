@@ -4,7 +4,7 @@ AI-powered revenue intelligence and client acquisition platform for a technology
 
 HUNTER discovers and researches companies, qualifies them with a deterministic scoring engine, tracks outreach and replies, and measures which industries and channels actually produce profitable customers.
 
-**Current state:** The dashboard, Lead Explorer, lead detail, Companies, Opportunities and Settings work against a real database. The compliance gate and approval queue work, and the AI framework (provider layer, prompts, guards, execution log) is built and tested. No AI agent is wired into a workflow yet, nothing can transmit a message, and the copilot and live data integrations are not built. See [PROGRESS.md](PROGRESS.md) for the exact status of every module.
+**Current state:** The dashboard, Lead Explorer, lead detail, Companies, Opportunities and Settings work against a real database. The compliance gate and approval queue work, and the AI framework (provider layer with Anthropic Claude, Google Gemini and a deterministic mock, prompts, guards, execution log) is built and tested. The provider is chosen with `LLM_PROVIDER` in `.env.local`. No AI agent is wired into a workflow yet, nothing can transmit a message, and the copilot and live data integrations are not built. See [PROGRESS.md](PROGRESS.md) for the exact status of every module.
 
 ## Requirements
 
@@ -54,7 +54,8 @@ npm run dev
 | `npm run test:integration` | Database tests (RLS, deduplication, compliance guards) |
 | `npm run test:e2e` | Browser tests |
 | `npm run build && npm run check:bundle` | Production build, then confirm no secret reached the browser bundle |
-| `npm run ai:smoke` | Run one prompt through the configured AI provider (one billed call when it is Anthropic) |
+| `npm run ai:smoke` | Run one prompt through the configured AI provider (one billed call when it is Anthropic or Gemini) |
+| `npm run ai:smoke:gemini` | The same, forcing Gemini for that run (needs `GEMINI_API_KEY`) |
 | `npm run ai:lock` | Record a new prompt version in the prompt lock |
 
 ## Demo data

@@ -7,7 +7,7 @@ import { buildSystemPrompt, type PromptDefinition } from "./prompts/shared";
 import type { LlmProvider, LlmUsage } from "./types";
 import { detectInjection } from "./untrusted";
 
-export type RecordedProvider = "mock" | "anthropic" | "openai" | "unconfigured";
+export type RecordedProvider = "mock" | "anthropic" | "gemini" | "openai" | "unconfigured";
 
 /** What the runner stores about each call. Never contains the prompt or the input text. */
 export interface AiExecutionRecord {

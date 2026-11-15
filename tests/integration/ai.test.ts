@@ -138,6 +138,9 @@ describe("AI execution log", () => {
     const base = { tenant_id: a.tenantId, prompt_id: "reply_classifier", prompt_version: "1.0.0", provider: "mock", duration_ms: 1 };
     expect((await admin.from("ai_executions").insert({ ...base, status: "failed" })).error?.code).toBe("23514"); // failure needs a kind
     expect((await admin.from("ai_executions").insert({ ...base, status: "succeeded", provider: "made-up" })).error?.code).toBe("23514");
+    for (const provider of ["mock", "anthropic", "gemini"]) {
+      expect((await admin.from("ai_executions").insert({ ...base, status: "succeeded", provider })).error, provider).toBeNull();
+    }
     expect((await admin.from("ai_executions").insert({ ...base, status: "succeeded", prompt_version: "v1" })).error?.code).toBe("23514");
   });
 });

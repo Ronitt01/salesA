@@ -26,11 +26,15 @@ const SECRET_FIELD =
   /(api[-_]?key|secret|password|passwd|authorization|cookie|service[-_]?role|credential)|^((access|refresh|auth|bearer|id|session)[-_]?)?token$/i;
 const SECRET_PATTERNS: RegExp[] = [
   /sk-ant-[A-Za-z0-9_-]{8,}/g,
+  // Google API keys.
+  /\bAIza[0-9A-Za-z_-]{30,}/g,
   /\bsk-[A-Za-z0-9_-]{20,}/g,
   /\beyJ[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{8,}/g,
 ];
 const SECRET_ENV_VARS = [
   "ANTHROPIC_API_KEY",
+  "GEMINI_API_KEY",
+  "GOOGLE_API_KEY",
   "OPENAI_API_KEY",
   "SUPABASE_SERVICE_ROLE_KEY",
   "N8N_WEBHOOK_SECRET",

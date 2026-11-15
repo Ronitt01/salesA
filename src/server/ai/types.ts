@@ -1,9 +1,9 @@
 import type { z } from "zod";
 
-/** How much reasoning effort the model should spend. Maps to Anthropic's output_config.effort. */
+/** How much reasoning effort the model should spend. Maps to Anthropic's output_config.effort and Gemini's thinking level. */
 export type Effort = "low" | "medium" | "high";
 
-export type ProviderName = "mock" | "anthropic";
+export type ProviderName = "mock" | "anthropic" | "gemini";
 
 /** One structured-output request to a model. Providers never see raw HUNTER objects. */
 export interface LlmRequest {

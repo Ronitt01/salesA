@@ -24,7 +24,7 @@ Supabase: Postgres + Auth
   ├─ SQL functions for every dashboard metric
   └─ Triggers that enforce suppression and do-not-contact
 
-Model providers: Anthropic Claude (official SDK) or the deterministic mock, selected by environment.
+Model providers: Anthropic Claude or Google Gemini (official SDKs), or the deterministic mock, selected by environment.
 Planned, not built: n8n (scheduling), data providers (search, enrichment, email, calendar).
 ```
 

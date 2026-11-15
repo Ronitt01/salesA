@@ -1,6 +1,6 @@
 # HUNTER progress tracker
 
-Last updated: 16 November 2026 (Sprint 2: core AI framework complete).
+Last updated: 16 November 2026 (Gemini provider added to the AI framework).
 
 Status key: **Done** = built and verified by a test or a browser check. **Partial** = some of it works; the gap is stated. **Not started** = no code yet.
 
@@ -8,7 +8,7 @@ Status key: **Done** = built and verified by a test or a browser check. **Partia
 
 Phase 0 and Phase 1 are complete. Parts of Phases 2, 3 and 5 were pulled forward because the database was available from day one. Phase 4 has started: the compliance gate and the approval queue work. **Nothing in the product can transmit a message yet**: live sending is off and only a mock delivery adapter exists, so an approved message is recorded as approved, never as sent.
 
-Sprint 2 built the core AI framework (see below). **No AI agent is connected to a workflow or screen yet**, and the live Anthropic path has been tested only against a fake HTTP transport, because no API key is configured.
+Sprint 2 built the core AI framework (see below). **No AI agent is connected to a workflow or screen yet**, and the live Anthropic and Gemini paths have been tested only against fake HTTP transports, because no API keys are configured.
 
 Verified on 16 November 2026:
 
@@ -16,7 +16,7 @@ Verified on 16 November 2026:
 |---|---|
 | `npm run typecheck` | Pass |
 | `npm run lint` | Pass |
-| `npm test` (unit) | 194 passed |
+| `npm test` (unit) | 230 passed |
 | `npm run test:integration` | 36 passed |
 | `npm run test:e2e` | 23 passed |
 | `npm run build` | Pass |
@@ -92,6 +92,20 @@ Decisions:
 - **Server-side refusal fallback is enabled.** If the model declines a request on safety grounds, Anthropic re-runs it on its recommended fallback model. The model that answered is recorded. To turn it off, remove `fallbacks` and the beta in `providers/anthropic.ts`.
 - **Injection detection logs but does not block.** Real web pages can contain such phrases. Strict schemas and evidence guards are the containment.
 
+## Gemini provider: Done
+
+Added after Sprint 2. Details in [docs/ai-framework.md](docs/ai-framework.md#providers).
+
+| Item | Status |
+|---|---|
+| Gemini adapter on `@google/genai` 3.3.0, same `LlmProvider` interface | Done, tested against a fake transport. **Not yet run against the live API** |
+| `LLM_PROVIDER=gemini`, `GEMINI_API_KEY`, `GEMINI_MODEL` (default `gemini-3.8-flash`) | Done, tested |
+| No fallback: a missing Gemini key or a Gemini outage is a failure, never another provider | Done, tested |
+| Provider and served model recorded in `ai_executions` (constraint widened by migration `20261116000200`) | Done, tested |
+| `npm run ai:smoke:gemini` | Done (fails cleanly without a key) |
+
+Unchanged: the Anthropic adapter, the mock, prompts, schemas, guards and all business logic. One extra fix: `src/server/env.ts` now accepts `LLM_PROVIDER=gemini`. Without it, choosing Gemini would have broken every page, not just AI calls.
+
 ## Phase 4 — Sales execution: Started
 
 Database guards exist and are tested (suppression blocks enrolment, a new suppression stops sequences and cancels unsent messages, booked meetings require a prospect-chosen slot).
@@ -132,7 +146,7 @@ Database guards exist and are tested (suppression blocks enrolment, a new suppre
 
 ## Next session: start here
 
-1. Verify the live provider: set `LLM_PROVIDER=anthropic` and `ANTHROPIC_API_KEY` in `.env.local`, run `npm run ai:smoke`, and note the result here.
+1. Verify the live providers: with `ANTHROPIC_API_KEY` set, run `npm run ai:smoke -- --provider=anthropic`; with `GEMINI_API_KEY` set, run `npm run ai:smoke:gemini`. Note the results here.
 2. Wire the first agents onto the framework: reply classification (WF-05) with the deterministic opt-out override, then outreach draft generation feeding the approval queue.
 3. The follow-up sequencer with stop conditions, calling the same compliance gate with `actor.kind = "automation"`.
 4. Suppression and consent actions in the Contacts screen, and the unsubscribe endpoint.

@@ -12,7 +12,7 @@ import "server-only";
  */
 export { runPrompt, type AiContext, type AiExecutionRecord, type AiResult, type AiRunMeta, type ExecutionRecorder } from "./run";
 export { sessionAiContext, supabaseRecorder, systemAiContext } from "./recorder";
-export { loadAiConfig, createProvider, DEFAULT_ANTHROPIC_MODEL, type AiConfig } from "./config";
+export { loadAiConfig, createProvider, DEFAULT_ANTHROPIC_MODEL, DEFAULT_GEMINI_MODEL, type AiConfig } from "./config";
 export { AiError, type AiErrorKind } from "./errors";
 export { PROMPTS, PROMPT_LIST, detectOptOutLanguage, type PromptId } from "./prompts";
 export type { LlmProvider, LlmRequest, LlmResponse, LlmUsage } from "./types";

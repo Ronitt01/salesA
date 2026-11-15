@@ -94,7 +94,7 @@ export async function getShellNotifications(ctx: SessionContext, now: Date): Pro
 
 /** Honest summary of what is real and what is simulated in this deployment. */
 export function getShellStatus(ctx: SessionContext): ShellStatusItem[] {
-  const llm = process.env.LLM_PROVIDER ?? "mock";
+  const llm = (process.env.LLM_PROVIDER ?? "").trim().toLowerCase() || "mock";
   const n8n = process.env.N8N_BASE_URL;
   const live = process.env.OUTBOUND_LIVE_SENDING === "true";
   const ws = ctx.workspace;
@@ -103,7 +103,8 @@ export function getShellStatus(ctx: SessionContext): ShellStatusItem[] {
     { label: "Database", value: "Connected", tone: "ok" },
     {
       label: "AI provider",
-      value: llm === "mock" ? "Mock (deterministic)" : llm === "anthropic" ? "Anthropic Claude" : "OpenAI",
+      value:
+        llm === "mock" ? "Mock (deterministic)" : llm === "anthropic" ? "Anthropic Claude" : llm === "gemini" ? "Google Gemini" : llm,
       tone: llm === "mock" ? "notice" : "ok",
     },
     { label: "Workflows", value: n8n ? "n8n connected" : "Local simulation", tone: n8n ? "ok" : "notice" },

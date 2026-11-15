@@ -42,7 +42,7 @@ const secrets = Object.entries(env).filter(
   ([key, value]) => !key.startsWith("NEXT_PUBLIC_") && value.length >= 8 && !SKIP_VALUES.has(value) && !/^https?:\/\//.test(value),
 );
 // Names that must never be referenced from client code, whatever their value.
-const forbiddenNames = ["SUPABASE_SERVICE_ROLE_KEY", "ANTHROPIC_API_KEY", "OPENAI_API_KEY", "N8N_WEBHOOK_SECRET", "DEMO_USER_PASSWORD"];
+const forbiddenNames = ["SUPABASE_SERVICE_ROLE_KEY", "ANTHROPIC_API_KEY", "GEMINI_API_KEY", "OPENAI_API_KEY", "N8N_WEBHOOK_SECRET", "DEMO_USER_PASSWORD"];
 
 let files = 0;
 const leaks = [];

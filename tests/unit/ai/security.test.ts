@@ -38,6 +38,7 @@ function researchOutput(facts: Array<{ evidenceUrl: string; evidenceQuote: strin
 afterEach(() => {
   delete process.env.ANTHROPIC_API_KEY;
   delete process.env.SUPABASE_SERVICE_ROLE_KEY;
+  delete process.env.GEMINI_API_KEY;
 });
 
 describe("untrusted content handling", () => {
@@ -155,11 +156,14 @@ describe("secret protection", () => {
   it("redacts configured secrets, key-shaped strings and secret-named fields", () => {
     process.env.ANTHROPIC_API_KEY = "sk-ant-api03-configured-secret-value-XYZ";
     process.env.SUPABASE_SERVICE_ROLE_KEY = "service-role-secret-value-1234567890";
-    const text = `key=${process.env.ANTHROPIC_API_KEY} role=${process.env.SUPABASE_SERVICE_ROLE_KEY} other=sk-ant-otherkey123456789`;
+    process.env.GEMINI_API_KEY = "AIzaConfiguredGeminiKey000000000000000";
+    const text = `key=${process.env.ANTHROPIC_API_KEY} role=${process.env.SUPABASE_SERVICE_ROLE_KEY} gemini=${process.env.GEMINI_API_KEY} other=sk-ant-otherkey123456789 google=AIzaSyUnconfiguredGoogleKey0000000000000`;
     const out = redactText(text);
     expect(out).not.toContain("configured-secret-value");
     expect(out).not.toContain("service-role-secret-value");
     expect(out).not.toContain("otherkey123456789");
+    expect(out).not.toContain("ConfiguredGeminiKey");
+    expect(out).not.toContain("UnconfiguredGoogleKey");
     expect(redact({ apiKey: "abc", nested: { authorization: "Bearer x", safe: "visible" } })).toEqual({
       apiKey: "[redacted]",
       nested: { authorization: "[redacted]", safe: "visible" },
@@ -174,23 +178,23 @@ describe("secret protection", () => {
     });
 
   it("marks every module that reads keys or calls providers as server-only", () => {
-    const required = ["config.ts", "run.ts", "recorder.ts", "index.ts", join("providers", "anthropic.ts"), join("providers", "mock.ts")];
+    const required = ["config.ts", "run.ts", "recorder.ts", "index.ts", join("providers", "anthropic.ts"), join("providers", "gemini.ts"), join("providers", "mock.ts")];
     for (const file of required) {
       expect(readFileSync(join(AI_DIR, file), "utf8"), `${file} must import "server-only"`).toMatch(/^import "server-only";/);
     }
     expect(readFileSync("src/server/logger.ts", "utf8")).toMatch(/^import "server-only";/);
   });
 
-  it("reads ANTHROPIC_API_KEY only in server configuration", () => {
+  it.each(["ANTHROPIC_API_KEY", "GEMINI_API_KEY"])("reads %s only in server configuration", (name) => {
     const allowed = new Set([join(AI_DIR, "config.ts"), join("src", "server", "logger.ts"), join("src", "server", "env.ts")]);
-    const offenders = files("src").filter((file) => !allowed.has(file) && readFileSync(file, "utf8").includes("ANTHROPIC_API_KEY"));
+    const offenders = files("src").filter((file) => !allowed.has(file) && readFileSync(file, "utf8").includes(name));
     expect(offenders).toEqual([]);
   });
 
   it("never imports the AI layer or the Anthropic SDK from a client component", () => {
     const offenders = files("src").filter((file) => {
       const source = readFileSync(file, "utf8");
-      return /^\s*["']use client["']/.test(source) && /from ["'](@\/server\/ai|@anthropic-ai\/sdk)/.test(source);
+      return /^\s*["']use client["']/.test(source) && /from ["'](@\/server\/ai|@anthropic-ai\/sdk|@google\/genai)/.test(source);
     });
     expect(offenders).toEqual([]);
   });

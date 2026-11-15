@@ -14,9 +14,11 @@ const schema = z.object({
   DEMO_USER_EMAIL: z.string().optional(),
   DEMO_USER_PASSWORD: z.string().optional(),
 
-  LLM_PROVIDER: z.enum(["mock", "anthropic", "openai"]).default("mock"),
+  LLM_PROVIDER: z.enum(["mock", "anthropic", "gemini", "openai"]).default("mock"),
   ANTHROPIC_API_KEY: z.string().optional(),
   ANTHROPIC_MODEL: z.string().optional(),
+  GEMINI_API_KEY: z.string().optional(),
+  GEMINI_MODEL: z.string().optional(),
   OPENAI_API_KEY: z.string().optional(),
   OPENAI_MODEL: z.string().optional(),
 
