@@ -1,6 +1,6 @@
 # HUNTER progress tracker
 
-Last updated: 15 November 2026 (Phase 1 complete; Phase 4 started).
+Last updated: 16 November 2026 (Sprint 2: core AI framework complete).
 
 Status key: **Done** = built and verified by a test or a browser check. **Partial** = some of it works; the gap is stated. **Not started** = no code yet.
 
@@ -8,14 +8,16 @@ Status key: **Done** = built and verified by a test or a browser check. **Partia
 
 Phase 0 and Phase 1 are complete. Parts of Phases 2, 3 and 5 were pulled forward because the database was available from day one. Phase 4 has started: the compliance gate and the approval queue work. **Nothing in the product can transmit a message yet**: live sending is off and only a mock delivery adapter exists, so an approved message is recorded as approved, never as sent.
 
-Verified on 15 November 2026:
+Sprint 2 built the core AI framework (see below). **No AI agent is connected to a workflow or screen yet**, and the live Anthropic path has been tested only against a fake HTTP transport, because no API key is configured.
+
+Verified on 16 November 2026:
 
 | Check | Result |
 |---|---|
 | `npm run typecheck` | Pass |
 | `npm run lint` | Pass |
-| `npm test` (unit) | 70 passed |
-| `npm run test:integration` | 27 passed |
+| `npm test` (unit) | 194 passed |
+| `npm run test:integration` | 36 passed |
 | `npm run test:e2e` | 23 passed |
 | `npm run build` | Pass |
 | `npm run check:bundle` | Pass, no server secrets in client files |
@@ -60,11 +62,35 @@ Verified on 15 November 2026:
 | Rescore service writing snapshots | Done, tested |
 | Industry attractiveness score (assumptions blended with actuals) | Done, tested |
 | Rule-based daily insights and industry recommendations | Done, tested |
-| LLM provider abstraction (Anthropic, OpenAI, mock) | Not started |
+| AI framework: provider interface, Anthropic adapter, deterministic mock, runner, guards, prompts, execution log | Done, tested (Sprint 2). Live Anthropic call not yet verified |
 | Search, discovery, website research, enrichment, verification provider interfaces and mocks | Not started |
 | Company discovery workflow (WF-01) | Not started |
 | Research and signal detection (WF-02) | Not started |
 | Service matching by AI | Not started (demo opportunities are seeded; people can create them) |
+
+## Sprint 2 — Core AI framework: Done
+
+Details in [docs/ai-framework.md](docs/ai-framework.md).
+
+| Item | Status |
+|---|---|
+| `LlmProvider` interface; environment-based selection (`LLM_PROVIDER`), no silent fallback to the mock | Done, tested |
+| Anthropic adapter on the official SDK (`@anthropic-ai/sdk` 1.8.0): structured output, per-prompt effort, server-side refusal fallback | Done, tested against a fake transport. **Not yet run against the live API** |
+| Deterministic mock provider with honest, synthetic fixtures | Done, tested |
+| Runner: input validation, timeouts, bounded retries, `retry-after`, total deadline, JSON parsing, Zod validation, post-validation guards | Done, tested |
+| Security: server-only modules, key redaction, untrusted-content delimiting, injection detection, strict schemas, evidence and promise guards | Done, tested |
+| Six versioned prompt files with an append-only version lock | Done, tested |
+| `ai_executions` table (append-only, tenant RLS) and structured logger | Done, tested |
+| OpenAI adapter | Not started (reserved; selecting it is a configuration error) |
+| Any agent wired into a workflow or screen | Not started |
+
+Decisions:
+
+- **One new dependency**, the official Anthropic SDK. The Claude API guidance requires the SDK rather than raw HTTP in a TypeScript project.
+- **One new table**, `ai_executions`. Neither `workflow_executions` nor `audit_logs` fits model calls.
+- **Default model `claude-opus-5-5`.** Override with `ANTHROPIC_MODEL` if you prefer a cheaper model; that trade-off is yours to make.
+- **Server-side refusal fallback is enabled.** If the model declines a request on safety grounds, Anthropic re-runs it on its recommended fallback model. The model that answered is recorded. To turn it off, remove `fallbacks` and the beta in `providers/anthropic.ts`.
+- **Injection detection logs but does not block.** Real web pages can contain such phrases. Strict schemas and evidence guards are the containment.
 
 ## Phase 4 — Sales execution: Started
 
@@ -106,7 +132,8 @@ Database guards exist and are tested (suppression blocks enrolment, a new suppre
 
 ## Next session: start here
 
-1. The LLM abstraction with a deterministic mock (load the Claude API reference before writing the Anthropic adapter), then message generation and reply classification on top of it.
-2. The follow-up sequencer with stop conditions, calling the same compliance gate with `actor.kind = "automation"`.
-3. Suppression and consent actions in the Contacts screen, and the unsubscribe endpoint.
-4. The floating copilot, using repositories as tools.
+1. Verify the live provider: set `LLM_PROVIDER=anthropic` and `ANTHROPIC_API_KEY` in `.env.local`, run `npm run ai:smoke`, and note the result here.
+2. Wire the first agents onto the framework: reply classification (WF-05) with the deterministic opt-out override, then outreach draft generation feeding the approval queue.
+3. The follow-up sequencer with stop conditions, calling the same compliance gate with `actor.kind = "automation"`.
+4. Suppression and consent actions in the Contacts screen, and the unsubscribe endpoint.
+5. Data provider interfaces (search, website fetch) so the researcher and signal detector receive real pages.

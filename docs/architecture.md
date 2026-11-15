@@ -14,16 +14,18 @@ Next.js 16 (App Router)
   │
   ├─ server/auth/context.ts    who is asking, which workspace, which role
   ├─ server/repositories/*     every database read
-  ├─ server/services/*         pure business logic (scoring, insights, industry score)
+  ├─ server/services/*         pure business logic (scoring, compliance gate, insights)
+  ├─ server/ai/*               AI runner, providers, prompts, guards (server-only)
   └─ server/db/*               Supabase clients and generated types
         │
         ▼
 Supabase: Postgres + Auth
-  ├─ Row Level Security on all 27 tables
+  ├─ Row Level Security on all 28 tables
   ├─ SQL functions for every dashboard metric
   └─ Triggers that enforce suppression and do-not-contact
 
-Planned, not built: n8n (scheduling), LLM and data providers behind adapters.
+Model providers: Anthropic Claude (official SDK) or the deterministic mock, selected by environment.
+Planned, not built: n8n (scheduling), data providers (search, enrichment, email, calendar).
 ```
 
 HUNTER is one deployable application. There are no microservices. n8n, when connected, only schedules and orchestrates; the logic and the safety gates stay in HUNTER.
@@ -59,6 +61,9 @@ HUNTER is one deployable application. There are no microservices. n8n, when conn
 | A lead is a company plus its primary contact | Exposed through `leads_view`; no separate lead table to keep in sync. |
 | Demo rows flagged `is_demo` | Resetting deletes only synthetic rows; real records are untouched. |
 | Local Supabase on ports 55321–55329 | Another Supabase project on this machine already uses the defaults. |
+| Models only produce data; deterministic code decides | Every AI output is schema-validated and checked against its input by guards. Models never score, qualify or send. See `ai-framework.md`. |
+| One table for AI execution metadata | `workflow_executions` describes scheduled jobs and `audit_logs` records human decisions; neither fits model calls. |
+| Official Anthropic SDK, SDK retries off | Typed errors and structured-output helpers from the SDK; retries owned by HUNTER's runner so each attempt is bounded, counted and logged. |
 
 ## Next.js 16 specifics
 
@@ -77,19 +82,20 @@ The project uses `cacheComponents` and `partialPrefetching`. Consequences that s
 - **Tenant isolation:** `tenant_id` on every table, RLS membership checks, composite foreign keys.
 - **Secrets:** server environment variables only. `npm run check:bundle` scans the browser bundle.
 - **Input:** Zod on every action and route. Free-text search is stripped of filter-syntax characters. CSV export neutralises formula injection.
-- **Audit:** `audit_logs` is append-only (no update or delete policy; update and delete revoked).
+- **Audit:** `audit_logs` and `ai_executions` are append-only (no update or delete policy; update and delete revoked).
+- **AI:** keys read only in `src/server/ai/config.ts`; untrusted content delimited and never placed in system prompts; strict output schemas and evidence guards; no tools given to models. Structured logs redact secrets.
 - **Headers:** `X-Frame-Options: DENY`, `nosniff`, strict referrer policy.
 
 ## Folder structure
 
 ```
 supabase/migrations/      schema, RLS, views and metric functions
-scripts/                  seed-demo.ts, check-client-bundle.mjs
+scripts/                  seed-demo.ts, check-client-bundle.mjs, ai-smoke.ts, update-prompt-lock.ts
 src/app/(app)/            the 12 screens plus leads/[id]
 src/app/login/            sign-in
 src/app/api/export/       CSV export
 src/components/           ui (shadcn), shell, dashboard, charts, leads, opportunities, settings, shared
-src/server/               auth, db, repositories, actions, services, demo
+src/server/               auth, db, repositories, actions, services, ai, demo, logger
 src/lib/                  format, labels, date-range, lead-params
 tests/                    unit, integration, e2e
 docs/                     this folder

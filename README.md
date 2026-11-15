@@ -4,7 +4,7 @@ AI-powered revenue intelligence and client acquisition platform for a technology
 
 HUNTER discovers and researches companies, qualifies them with a deterministic scoring engine, tracks outreach and replies, and measures which industries and channels actually produce profitable customers.
 
-**Current state:** Phase 1 is complete. The dashboard, Lead Explorer, lead detail, Companies, Opportunities and Settings are fully working against a real database. Sending, approvals, the AI copilot and live integrations are not built yet. See [PROGRESS.md](PROGRESS.md) for the exact status of every module.
+**Current state:** The dashboard, Lead Explorer, lead detail, Companies, Opportunities and Settings work against a real database. The compliance gate and approval queue work, and the AI framework (provider layer, prompts, guards, execution log) is built and tested. No AI agent is wired into a workflow yet, nothing can transmit a message, and the copilot and live data integrations are not built. See [PROGRESS.md](PROGRESS.md) for the exact status of every module.
 
 ## Requirements
 
@@ -54,6 +54,8 @@ npm run dev
 | `npm run test:integration` | Database tests (RLS, deduplication, compliance guards) |
 | `npm run test:e2e` | Browser tests |
 | `npm run build && npm run check:bundle` | Production build, then confirm no secret reached the browser bundle |
+| `npm run ai:smoke` | Run one prompt through the configured AI provider (one billed call when it is Anthropic) |
+| `npm run ai:lock` | Record a new prompt version in the prompt lock |
 
 ## Demo data
 
@@ -75,6 +77,7 @@ Reset or remove it from **Settings → Demo data**, or with `npm run db:seed`.
 | [PROGRESS.md](PROGRESS.md) | What is built, what is not, what is next |
 | [docs/architecture.md](docs/architecture.md) | Structure, request flow, key decisions |
 | [docs/database-schema.md](docs/database-schema.md) | Tables, constraints, RLS, metric functions |
+| [docs/ai-framework.md](docs/ai-framework.md) | AI runner, providers, prompts, guards, execution log |
 | [docs/agent-design.md](docs/agent-design.md) | Scoring, insights, planned AI agents |
 | [docs/outreach-policies.md](docs/outreach-policies.md) | Channel rules and compliance guards |
 | [docs/n8n-workflows.md](docs/n8n-workflows.md) | The six workflows and the n8n integration plan |

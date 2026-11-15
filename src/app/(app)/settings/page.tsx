@@ -45,6 +45,7 @@ async function Settings() {
     if (c.industry_id) countByIndustry.set(c.industry_id, (countByIndustry.get(c.industry_id) ?? 0) + 1);
   }
   const live = process.env.OUTBOUND_LIVE_SENDING === "true";
+  const llmProvider = (process.env.LLM_PROVIDER ?? "").trim().toLowerCase() || "mock";
 
   return (
     <>
@@ -178,7 +179,9 @@ async function Settings() {
 
         <Panel title="Providers" description="Which integrations are live and which are mocks">
           <ul className="divide-y divide-border/60">
-            {(providers.data ?? []).map((p) => {
+            {(providers.data ?? []).map((row) => {
+              // The AI provider is selected by the server environment, so show what is really in use.
+              const p = row.category === "llm" ? { ...row, provider: llmProvider } : row;
               const mock = p.provider === "mock" || p.provider === "local_simulation";
               return (
                 <li key={p.category} className="flex items-center justify-between gap-3 py-2 first:pt-0 last:pb-0">

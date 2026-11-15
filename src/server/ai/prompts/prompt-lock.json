@@ -1,0 +1,8 @@
+{
+  "buying_signal_detector@1.0.0": "ad55f1932fabdbc186d5ca58fd97b87db5c6ec4aa10242e506e7c0d5383e10bc",
+  "company_researcher@1.0.0": "15cd242654897bfd491daf6c95b1f1eb0dafa8280e41a8ee36b770d1ac04f01c",
+  "lead_qualifier@1.0.0": "fda14834b78a382714333588103c1a68b2a3c6a83c2227c28017cd8daaa4242d",
+  "opportunity_strategist@1.0.0": "40b5e63f9d809966f000dd06fd948865af4a88df64179c15372884d4710ac79c",
+  "reply_classifier@1.0.0": "93852e3b04712a2381db715c5aa1792edfc6edf8486ae3373550fe89bd3814c4",
+  "sales_message_generator@1.0.0": "49b2d319bf82959fa853f343a61ea92a0fc00278cf513062b85bda3a11d1bc91"
+}

@@ -51,15 +51,17 @@ Stage effects are deliberately narrow: a newly qualified pre-outreach lead becom
 
 `src/server/services/analytics/insights.ts`. Fixed rules over computed metrics. Every sentence carries the figures it came from. Rates are not compared below 5 contacted companies. **No model writes these**, and the interface says so.
 
+### AI framework
+
+The shared foundation for every agent below is built and tested: the provider interface, the Anthropic adapter and the deterministic mock, the runner with retries and validation, the security guards, the six versioned prompts and the execution log. See [ai-framework.md](ai-framework.md). The agents themselves are not wired into any workflow yet.
+
 ## Planned
-
-### Provider-independent LLM layer
-
-Interface with three adapters: Anthropic, OpenAI and a deterministic mock. Structured output validated with Zod; a response that fails validation is retried, then rejected. The Anthropic adapter must be written against the current API reference, not from memory.
 
 ### Agents
 
 Each is a narrow function with typed input and output, not one large prompt.
+
+Each row below already has its prompt, schemas, guards and mock fixture in `src/server/ai/prompts/`. What remains is the workflow that gathers its input and acts on its output.
 
 | Agent | Input | Output | Guard |
 |---|---|---|---|

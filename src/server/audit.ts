@@ -1,4 +1,5 @@
 import "server-only";
+import { logger } from "@/server/logger";
 import type { SessionContext } from "@/server/auth/context";
 import type { Json } from "@/server/db/database.types";
 
@@ -31,6 +32,6 @@ export function actionError(error: unknown, fallback: string): { ok: false; erro
   if (error instanceof Error && (error.name === "ForbiddenError" || error.name === "RescoreError")) {
     return { ok: false, error: error.message };
   }
-  console.error(JSON.stringify({ level: "error", scope: "action", message: fallback, cause: error instanceof Error ? error.message : String(error) }));
+  logger.error("action", fallback, { cause: error instanceof Error ? error.message : String(error) });
   return { ok: false, error: fallback };
 }

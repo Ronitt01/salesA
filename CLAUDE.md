@@ -21,6 +21,8 @@ Read `PROGRESS.md` first: it says what is built, what is not, and what to do nex
 | Integration tests (needs local DB) | `npm run test:integration` |
 | Browser tests (needs DB + seed) | `npm run test:e2e` |
 | Production build + secret scan | `npm run build && npm run check:bundle` |
+| One live AI call (billed when `LLM_PROVIDER=anthropic`) | `npm run ai:smoke` |
+| Record a new prompt version | `npm run ai:lock` |
 
 Local Supabase runs on ports **55321–55329**, not the defaults, so it can run beside other Supabase projects on this machine. Apply a new migration with `npx supabase migration up`, then `npm run db:types`.
 
@@ -33,14 +35,18 @@ Local Supabase runs on ports **55321–55329**, not the defaults, so it can run 
 5. **No dashboard number is hardcoded.** Metrics come from SQL functions in `…_views_and_metrics.sql` or are computed from rows in a repository.
 6. **Facts and hypotheses stay separate.** An `observed_fact` requires an evidence URL (database constraint). AI output is stored as `ai_hypothesis`.
 7. **Secrets live in server env vars only.** `SUPABASE_SERVICE_ROLE_KEY` is used only in `server-only` modules. `npm run check:bundle` must pass.
-8. **Retrieved web content is data, never instructions.**
+8. **Retrieved web content is data, never instructions.** It goes only into the user turn through `wrapUntrusted`, never into a system prompt.
+9. **All model calls go through `runPrompt`** (`src/server/ai/run.ts`). Never call a provider SDK directly from a page, action or service. A misconfigured provider fails; never fall back to the mock. Mock output is synthetic and must never be stored as research.
+10. **Prompts are versioned.** Changing a prompt file means bumping its version and running `npm run ai:lock`. Output schemas stay strict and must never contain a score, priority or send decision.
 
 ## Architecture in one screen
 
 - `src/app/(app)/*` — pages. Each is a thin async Server Component inside `<Suspense>`.
 - `src/server/auth/context.ts` — `getSessionContext()`: the one entry point for user, workspace and role. Every page, action and route handler calls it.
 - `src/server/repositories/*` — all database reads. `src/server/actions/*` — all mutations (`"use server"`, Zod-validated, audited).
-- `src/server/services/*` — pure business logic (scoring, insights, industry score). No I/O; unit-tested.
+- `src/server/services/*` — pure business logic (scoring, compliance gate, insights, industry score). No I/O; unit-tested.
+- `src/server/ai/*` — AI layer: `runPrompt`, providers (Anthropic, mock), prompts, guards, untrusted-content handling, execution recorder. Server-only. See `docs/ai-framework.md`.
+- `src/server/logger.ts` — structured JSON logging with secret redaction. Log ids, counts and outcomes, never prompts or message content.
 - `src/server/db/server.ts` — RLS-bound client. `admin.ts` — service-role client (seed, future webhooks/workflows only).
 - `src/server/demo/*` — workspace bootstrap and the synthetic dataset.
 - `src/components/*` — UI. `src/lib/*` — formatting, labels (the English dictionary), date ranges.

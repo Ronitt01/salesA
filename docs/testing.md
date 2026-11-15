@@ -4,22 +4,24 @@
 
 | Suite | Command | Needs | What it covers |
 |---|---|---|---|
-| Unit | `npm test` | Nothing | Scoring engine, contact reliability, compliance gate, industry score, insights, date ranges and timezones, formatting, URL parameters, demo dataset generator |
-| Integration | `npm run test:integration` | Local Supabase running | RLS tenant isolation, roles, deduplication, suppression and do-not-contact guards, meeting and evidence constraints, rescoring, demo seed and reset |
+| Unit | `npm test` | Nothing | Scoring engine, contact reliability, compliance gate, industry score, insights, date ranges and timezones, formatting, URL parameters, demo dataset generator, AI framework (provider selection, mock, Anthropic adapter against a fake transport, retries, rate limits, invalid JSON, schema and guard failures, prompt injection, secret redaction, prompt version lock) |
+| Integration | `npm run test:integration` | Local Supabase running | RLS tenant isolation, roles, deduplication, suppression and do-not-contact guards, meeting and evidence constraints, rescoring, demo seed and reset, AI execution log (tenant isolation, append-only, constraints) |
 | Browser | `npm run test:e2e` | Local Supabase + `npm run db:seed` | Sign-in, every navigation item, dashboard, filters, lead create/edit, saved filters, bulk tags, export, approval queue and compliance gate, phone layout |
 | Static | `npm run typecheck`, `npm run lint` | Nothing | Types and lint rules |
 | Build | `npm run build && npm run check:bundle` | `.env.local` | Production build; no server secret in browser files |
 
+None of the suites needs AI credentials: the AI tests use the mock provider, scripted providers and a fake HTTP transport for the Anthropic adapter. A live call is checked separately with `npm run ai:smoke`.
+
 Integration tests refuse to run unless `NEXT_PUBLIC_SUPABASE_URL` points at localhost. They create their own workspaces and users and delete them afterwards. Browser tests remove the companies and saved filters they create (names start with "E2E Test").
 
-## Last full run: 15 November 2026
+## Last full run: 16 November 2026
 
 | Suite | Result |
 |---|---|
 | Type check | Pass |
 | Lint | Pass |
-| Unit | 70 passed, 0 failed |
-| Integration | 27 passed, 0 failed |
+| Unit | 194 passed, 0 failed |
+| Integration | 36 passed, 0 failed |
 | Browser | 23 passed, 0 failed |
 | Build | Pass |
 | Bundle secret scan | Pass |

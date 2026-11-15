@@ -44,6 +44,7 @@ PostgreSQL 17 on Supabase. Source of truth: `supabase/migrations/`. Generated ty
 | `provider_settings` | Non-secret provider configuration | `unique (tenant_id, category)` |
 | `saved_filters` | A user's saved Lead Explorer filters | |
 | `audit_logs` | Append-only audit trail | No update or delete |
+| `ai_executions` | One row per AI call: prompt id and version, provider, served model, status, error kind, attempts, duration, tokens, injection signals, synthetic flag, validated output | Append-only; success iff no error kind; output only on success. Never stores prompt or input text |
 
 ## Deduplication
 
@@ -65,6 +66,7 @@ Enabled on every table. Helper functions live in the `private` schema, which the
 | `users` | Self and people in a shared workspace | Self | – |
 | `saved_filters` | Owner of the filter | Owner of the filter | Owner of the filter |
 | `audit_logs` | Members | Members, as themselves | Nobody |
+| `ai_executions` | Members | Owner, admin, member, as themselves (service role for workflows) | Nobody |
 
 The `anon` role has no access to any table, view or metric function.
 
