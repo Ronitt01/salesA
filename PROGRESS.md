@@ -1,12 +1,12 @@
 # HUNTER progress tracker
 
-Last updated: 15 November 2026 (end of Phase 1).
+Last updated: 15 November 2026 (Phase 1 complete; Phase 4 started).
 
 Status key: **Done** = built and verified by a test or a browser check. **Partial** = some of it works; the gap is stated. **Not started** = no code yet.
 
 ## Where things stand
 
-Phase 0 and Phase 1 are complete. Parts of Phases 2, 3 and 5 were pulled forward because the database was available from day one. Phase 4 (sending, approvals, reply handling) has not started: **nothing in the product can send a message yet**, and there are no approve or send buttons.
+Phase 0 and Phase 1 are complete. Parts of Phases 2, 3 and 5 were pulled forward because the database was available from day one. Phase 4 has started: the compliance gate and the approval queue work. **Nothing in the product can transmit a message yet**: live sending is off and only a mock delivery adapter exists, so an approved message is recorded as approved, never as sent.
 
 Verified on 15 November 2026:
 
@@ -14,9 +14,9 @@ Verified on 15 November 2026:
 |---|---|
 | `npm run typecheck` | Pass |
 | `npm run lint` | Pass |
-| `npm test` (unit) | 49 passed |
+| `npm test` (unit) | 70 passed |
 | `npm run test:integration` | 27 passed |
-| `npm run test:e2e` | 18 passed |
+| `npm run test:e2e` | 23 passed |
 | `npm run build` | Pass |
 | `npm run check:bundle` | Pass, no server secrets in client files |
 
@@ -66,14 +66,16 @@ Verified on 15 November 2026:
 | Research and signal detection (WF-02) | Not started |
 | Service matching by AI | Not started (demo opportunities are seeded; people can create them) |
 
-## Phase 4 — Sales execution: Not started
+## Phase 4 — Sales execution: Started
 
-Database guards exist and are tested (suppression blocks enrolment, a new suppression stops sequences and cancels unsent messages, booked meetings require a prospect-chosen slot). No application code uses them yet.
+Database guards exist and are tested (suppression blocks enrolment, a new suppression stops sequences and cancels unsent messages, booked meetings require a prospect-chosen slot).
 
-- [ ] Compliance gate service: kill switch, channel policy, consent, suppression, limits, idempotency
-- [ ] Message generation with supported-facts check
-- [ ] Approval queue actions (approve / reject / edit)
-- [ ] Email delivery adapter (mock first), unsubscribe endpoint
+- [x] Compliance gate service (`src/server/services/compliance/gate.ts`): 17 checks covering kill switch, channel policy, automation, consent, suppression, address, outreach mode, campaign status, three daily limits, idempotency, supported facts and opt-out. Pure function, 21 unit tests
+- [x] Approval queue in the Conversation Centre: approve and reject, gate result stored on the message and shown check by check, every decision audited. 5 browser tests
+- [x] Email delivery adapter interface with a mock that never transmits
+- [ ] Editing a draft before approval
+- [ ] A real email delivery adapter, and the unsubscribe endpoint
+- [ ] Message generation with supported-facts check (the gate currently verifies that cited fact ids exist; it does not read the message text)
 - [ ] Follow-up sequencer with stop conditions
 - [ ] Reply classification and reply drafting, human takeover
 - [ ] Calendar adapter, slot suggestions, booking, rescheduling, cancellation
@@ -104,6 +106,7 @@ Database guards exist and are tested (suppression blocks enrolment, a new suppre
 
 ## Next session: start here
 
-1. Phase 4, compliance gate first: `src/server/services/compliance/gate.ts` as a pure function with unit tests, then the approval actions that call it.
-2. Then the mock email adapter and the approval UI in the Conversation Centre.
-3. Then the LLM abstraction (load the Claude API reference before writing the Anthropic adapter).
+1. The LLM abstraction with a deterministic mock (load the Claude API reference before writing the Anthropic adapter), then message generation and reply classification on top of it.
+2. The follow-up sequencer with stop conditions, calling the same compliance gate with `actor.kind = "automation"`.
+3. Suppression and consent actions in the Contacts screen, and the unsubscribe endpoint.
+4. The floating copilot, using repositories as tools.

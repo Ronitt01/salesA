@@ -9,7 +9,8 @@ import { PageSkeleton } from "@/components/shell/shell-skeleton";
 import { cn } from "@/lib/utils";
 import { formatDateTime, formatRelative } from "@/lib/format";
 import { CHANNEL_LABEL, OUTREACH_MODE_LABEL } from "@/lib/labels";
-import { getSessionContext } from "@/server/auth/context";
+import { ApprovalControls } from "@/components/conversations/approval-controls";
+import { canWrite, getSessionContext } from "@/server/auth/context";
 import { getConversation, listConversations } from "@/server/repositories/crm";
 
 export const metadata: Metadata = { title: "Conversation Centre" };
@@ -22,10 +23,38 @@ const VIEWS = [
   { key: "review", label: "Needs review" },
 ] as const;
 
+const gateSchema = z.object({
+  allowed: z.boolean(),
+  delivery: z.string(),
+  checks: z.array(z.object({ id: z.string(), label: z.string(), passed: z.boolean(), detail: z.string() })),
+});
+
+/** The stored compliance decision for a message, check by check. */
+function GateResult({ value }: { value: unknown }) {
+  const parsed = gateSchema.safeParse(value);
+  if (!parsed.success) return null;
+  const failed = parsed.data.checks.filter((c) => !c.passed).length;
+  return (
+    <details className="mt-2 text-xs">
+      <summary className="cursor-pointer text-info">
+        Compliance gate: {parsed.data.allowed ? "all checks passed" : `${failed} check${failed === 1 ? "" : "s"} failed`}
+      </summary>
+      <ul className="mt-2 space-y-1 border-l pl-3">
+        {parsed.data.checks.map((c) => (
+          <li key={c.id} className={c.passed ? "text-muted-foreground" : "text-danger"}>
+            <span className="font-medium">{c.passed ? "Passed" : "Failed"}:</span> {c.label}. {c.detail}
+          </li>
+        ))}
+      </ul>
+    </details>
+  );
+}
+
 async function Conversations({ searchParams }: { searchParams: SearchParams }) {
   const params = await searchParams;
   const view = VIEWS.find((v) => v.key === params.view)?.key ?? "all";
   const ctx = await getSessionContext();
+  const writer = canWrite(ctx.role);
   const now = new Date();
   const tz = ctx.workspace.timezone;
 
@@ -151,10 +180,24 @@ async function Conversations({ searchParams }: { searchParams: SearchParams }) {
                             </p>
                           ) : null}
                           {m.status === "pending_approval" ? (
-                            <p className="mt-2 rounded-md border border-warning/30 bg-warning/10 px-2.5 py-1.5 text-xs text-warning">
-                              Waiting for a person to approve. It has not been sent.
+                            <>
+                              <p className="mt-2 rounded-md border border-warning/30 bg-warning/10 px-2.5 py-1.5 text-xs text-warning">
+                                Waiting for a person to approve. It has not been sent.
+                              </p>
+                              {writer ? <ApprovalControls messageId={m.id} /> : null}
+                            </>
+                          ) : null}
+                          {m.status === "approved" ? (
+                            <p className="mt-2 rounded-md border border-info/30 bg-info/10 px-2.5 py-1.5 text-xs text-info">
+                              Approved by a person and cleared by the compliance gate. Not sent: live sending is switched off.
                             </p>
                           ) : null}
+                          {m.status === "rejected" ? (
+                            <p className="mt-2 rounded-md border bg-muted px-2.5 py-1.5 text-xs text-muted-foreground">
+                              Rejected by a person. It was never sent.
+                            </p>
+                          ) : null}
+                          <GateResult value={m.gate_result} />
                         </div>
                       </li>
                     );

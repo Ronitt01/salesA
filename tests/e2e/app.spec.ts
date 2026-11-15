@@ -241,17 +241,20 @@ test.describe("lead explorer", () => {
     await expect(page.getByText("Met the owner at a trade fair.")).toBeVisible();
 
     // Edit
+    // Scope to the visible dialog: Next.js keeps the previous page mounted but hidden.
     await page.getByRole("button", { name: "Edit" }).click();
-    await page.getByLabel("Company name").fill(`${name} Edited`);
-    await page.getByRole("button", { name: "Save changes" }).click();
+    const editDialog = page.getByRole("dialog", { name: "Edit lead" });
+    await editDialog.getByLabel("Company name").fill(`${name} Edited`);
+    await editDialog.getByRole("button", { name: "Save changes" }).click();
     await expect(page.getByRole("heading", { level: 1, name: `${name} Edited` })).toBeVisible();
 
     // Duplicate domain is refused.
     await page.goto("/leads");
     await page.getByRole("button", { name: "New lead" }).click();
-    await page.getByLabel("Company name").fill(`${E2E_PREFIX} Duplicate ${stamp}`);
-    await page.getByLabel("Website domain").fill(domain.toUpperCase());
-    await page.getByRole("button", { name: "Create lead" }).click();
+    const newDialog = page.getByRole("dialog", { name: "New lead" });
+    await newDialog.getByLabel("Company name").fill(`${E2E_PREFIX} Duplicate ${stamp}`);
+    await newDialog.getByLabel("Website domain").fill(domain.toUpperCase());
+    await newDialog.getByRole("button", { name: "Create lead" }).click();
     await expect(page.getByText(/already exists/)).toBeVisible();
   });
 

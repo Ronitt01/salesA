@@ -4,9 +4,9 @@
 
 | Suite | Command | Needs | What it covers |
 |---|---|---|---|
-| Unit | `npm test` | Nothing | Scoring engine, contact reliability, industry score, insights, date ranges and timezones, formatting, URL parameters, demo dataset generator |
+| Unit | `npm test` | Nothing | Scoring engine, contact reliability, compliance gate, industry score, insights, date ranges and timezones, formatting, URL parameters, demo dataset generator |
 | Integration | `npm run test:integration` | Local Supabase running | RLS tenant isolation, roles, deduplication, suppression and do-not-contact guards, meeting and evidence constraints, rescoring, demo seed and reset |
-| Browser | `npm run test:e2e` | Local Supabase + `npm run db:seed` | Sign-in, every navigation item, dashboard, filters, lead create/edit, saved filters, bulk tags, export, phone layout |
+| Browser | `npm run test:e2e` | Local Supabase + `npm run db:seed` | Sign-in, every navigation item, dashboard, filters, lead create/edit, saved filters, bulk tags, export, approval queue and compliance gate, phone layout |
 | Static | `npm run typecheck`, `npm run lint` | Nothing | Types and lint rules |
 | Build | `npm run build && npm run check:bundle` | `.env.local` | Production build; no server secret in browser files |
 
@@ -18,9 +18,9 @@ Integration tests refuse to run unless `NEXT_PUBLIC_SUPABASE_URL` points at loca
 |---|---|
 | Type check | Pass |
 | Lint | Pass |
-| Unit | 49 passed, 0 failed |
+| Unit | 70 passed, 0 failed |
 | Integration | 27 passed, 0 failed |
-| Browser | 18 passed, 0 failed |
+| Browser | 23 passed, 0 failed |
 | Build | Pass |
 | Bundle secret scan | Pass |
 
@@ -39,7 +39,7 @@ Status against the 20 acceptance criteria. "Verified" names the test or check th
 | 7 | Evidence is visible on lead detail pages | Met | e2e "lead detail separates observed facts from AI hypotheses…" |
 | 8 | Lead scoring is deterministic and tested | Met | unit `scoring.test.ts`; integration rescore twice gives the same total |
 | 9 | Duplicate prevention works | Met | integration "duplicate prevention" (5 tests); e2e duplicate domain refused |
-| 10 | Permission gates block disallowed outreach | **Partly met** | Database guards block suppressed and do-not-contact enrolment (tested). The application-level compliance gate is not built, so channel-policy and limit checks are untested |
+| 10 | Permission gates block disallowed outreach | Met | unit `compliance-gate.test.ts` (21 tests: kill switch, missing policy, human-only channels, consent, suppression, modes, limits, idempotency); e2e kill switch and paused campaign block approval; integration tests for the database guards |
 | 11 | Unsubscribed contacts cannot re-enter campaigns | Met | integration "blocks an unsubscribed contact…", "blocks even the service role…" |
 | 12 | Message generation returns structured output | **Not met** | Message generation is not built |
 | 13 | Conversation classification works on sample cases | **Not met** | Classifier is not built; seeded replies carry stored intents only |
@@ -51,7 +51,7 @@ Status against the 20 acceptance criteria. "Verified" names the test or check th
 | 19 | Empty and loading states work | Met | e2e empty-state test; skeletons render as the static shell in `npm run build` |
 | 20 | TypeScript, linting and tests pass | Met | See "Last full run" |
 
-**14 met, 2 partly met, 4 not met.** The unmet items all belong to Phase 4 (outreach engine) and Phase 5 (n8n), which have not started.
+**15 met, 1 partly met, 4 not met.** The unmet items belong to the remaining parts of Phase 4 (message generation, reply classification, slot suggestion) and Phase 5 (n8n).
 
 ## Adding tests
 
