@@ -62,7 +62,13 @@ async function insertAll<T extends TableName>(
 /** Removes every synthetic row for the tenant. Real records are never touched. */
 export async function clearDemoData(admin: Admin, tenantId: string): Promise<void> {
   for (const table of DEMO_TABLES_DELETE_ORDER) {
-    const { error } = await admin.from(table).delete().eq("tenant_id", tenantId).eq("is_demo", true);
+    // Every table in the list has tenant_id and is_demo; the cast gives the query
+    // builder one concrete table shape to type the filters against.
+    const { error } = await admin
+      .from(table as "companies")
+      .delete()
+      .eq("tenant_id", tenantId)
+      .eq("is_demo", true);
     if (error) throw new Error(`Demo reset failed clearing ${table}: ${error.message}`);
   }
   const { error } = await admin.from("workspaces").update({ has_demo_data: false }).eq("id", tenantId);

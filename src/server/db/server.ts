@@ -1,5 +1,6 @@
 import "server-only";
 import { createServerClient } from "@supabase/ssr";
+import { io } from "next/cache";
 import { cookies } from "next/headers";
 import type { Database } from "./database.types";
 import { getEnv } from "@/server/env";
@@ -11,6 +12,10 @@ import { getEnv } from "@/server/env";
 export async function createClient() {
   const env = getEnv();
   const cookieStore = await cookies();
+  // The Supabase auth client reads the clock (token expiry) as soon as it is used.
+  // io() tells Next.js that everything after this point is request-time work, so it
+  // is never evaluated while prerendering the static shell.
+  await io();
 
   return createServerClient<Database>(env.NEXT_PUBLIC_SUPABASE_URL, env.NEXT_PUBLIC_SUPABASE_ANON_KEY, {
     cookies: {

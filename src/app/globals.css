@@ -105,12 +105,26 @@
   --danger: #ef5f5b;
   --destructive: #ef5f5b;
 
-  /* Categorical chart series, ordered for separation on a dark surface */
-  --chart-1: #5b8ff5;
-  --chart-2: #4fc56d;
-  --chart-3: #a487f7;
-  --chart-4: #f0a93b;
-  --chart-5: #3fbfc9;
+  /*
+   * Categorical chart series. The ORDER is the colour-blind safety mechanism:
+   * this set passes adjacent-pair CVD separation, the normal-vision floor and 3:1
+   * contrast against --card. Assign in order, never cycle, never reorder.
+   */
+  --chart-1: #3987e5;
+  --chart-2: #d95926;
+  --chart-3: #199e70;
+  --chart-4: #c98500;
+  --chart-5: #d55181;
+  --chart-6: #0ca30c;
+  --chart-7: #9085e9;
+  --chart-8: #e66767;
+
+  /* Chart status colours: state, never identity. Always paired with a label. */
+  --status-good: #0ca30c;
+  --status-warning: #fab219;
+  --status-serious: #ec835a;
+  --status-critical: #d03b3b;
+  --status-neutral: #5d6779;
 
   --sidebar-foreground: #c5ccd8;
   --sidebar-primary: #e7ebf2;
