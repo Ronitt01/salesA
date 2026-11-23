@@ -1,0 +1,29 @@
+# Local n8n for development. Start with `npm run n8n:start`, open http://localhost:5678.
+# n8n only schedules and calls HUNTER's webhooks; the logic and safety gates stay in HUNTER.
+name: hunter-n8n
+services:
+  n8n:
+    image: docker.n8n.io/n8nio/n8n:2.48.8
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:5678:5678" # local machine only
+    environment:
+      GENERIC_TIMEZONE: Asia/Kolkata
+      TZ: Asia/Kolkata
+      N8N_HOST: localhost
+      N8N_PROTOCOL: http
+      N8N_SECURE_COOKIE: "false" # plain http on localhost
+      N8N_DIAGNOSTICS_ENABLED: "false" # no telemetry
+      N8N_PERSONALIZATION_ENABLED: "false"
+      N8N_VERSION_NOTIFICATIONS_ENABLED: "false"
+      N8N_TEMPLATES_ENABLED: "false"
+      N8N_RUNNERS_ENABLED: "true"
+      # Workflows reach the HUNTER dev server through this URL.
+      HUNTER_BASE_URL: http://host.docker.internal:3000
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - n8n_data:/home/node/.n8n
+
+volumes:
+  n8n_data:

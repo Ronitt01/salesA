@@ -11,6 +11,22 @@
 
 With no `N8N_BASE_URL` set, the Automations screen states that the system is in local simulation mode and that nothing is being scheduled.
 
+## Running n8n locally
+
+n8n 2.48.8 runs in Docker beside the database (`n8n/docker-compose.yml`):
+
+```bash
+npm run n8n:start   # http://localhost:5678 (bound to this machine only)
+npm run n8n:logs
+npm run n8n:stop    # workflows and credentials survive in the n8n_data volume
+```
+
+- The first visit asks you to create the local owner account. It stays on this machine.
+- Timezone is Asia/Kolkata, so cron schedules below are IST.
+- Telemetry, version checks and the template gallery are off.
+- Inside n8n, reach the HUNTER dev server at `http://host.docker.internal:3000` (also available to workflows as `$env.HUNTER_BASE_URL`), not `localhost`.
+- Leave `N8N_BASE_URL` empty in `.env.local` until HUNTER's webhook endpoints exist; setting it tells the UI that n8n is connected.
+
 ## The six workflows
 
 | Key | Name | Schedule (cron, IST) | What it will do |
